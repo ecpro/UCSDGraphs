@@ -1,10 +1,13 @@
 package basicgraph;
 
+import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import util.GraphLoader;
 
 /** A class that implements a directed graph. 
  * The graph may have self-loops, parallel edges. 
@@ -95,8 +98,16 @@ public class GraphAdjList extends Graph {
 	 * @return List<Integer> a list of indices of vertices.  
 	 */		
 	 public List<Integer> getDistance2(int v) {
-		 // XXX: Implement this method in week 2
-		 return null;
+		 List<Integer> twoHopNeighbours = new ArrayList<Integer>();
+		 List<Integer> neighbours = getNeighbors(v);
+		 for(Integer vertex : neighbours) {
+			 for(Integer i : getNeighbors(vertex)) {
+				 if(i != v) {
+					 twoHopNeighbours.add(i);
+				 }
+			 }
+		 }
+		 return twoHopNeighbours;
 	}
 	
 	/**
@@ -116,7 +127,14 @@ public class GraphAdjList extends Graph {
 		return s;
 	}
 
-
+	public static void main(String[] args) {
+		//Graph testGraph = new GraphAdjList();
+		Graph testGraph = new GraphAdjMatrix();
+		GraphLoader.loadRoadMap("data/testData/myTestdata.map", testGraph);
+		for(int i = 0; i < testGraph.getNumVertices(); i++) {
+			System.out.println("vertex " + i + " " + testGraph.getDistance2(i));
+		}
+	}
 
 
 }

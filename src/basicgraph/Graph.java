@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import util.GraphLoader;
 
@@ -126,10 +124,11 @@ public abstract class Graph {
 			int degreeCountForEachVtx = 0;
 			List<Integer> outNeighbours = getNeighbors(i);
 			List<Integer> inNeighbours = getInNeighbors(i);
-			degreeCountForEachVtx += outNeighbours.size();
-			degreeCountForEachVtx += inNeighbours.size();
+			degreeCountForEachVtx = outNeighbours.size() + inNeighbours.size();
 			degreeSequenceList.add(degreeCountForEachVtx);
 		}
+		Collections.sort(degreeSequenceList);
+		Collections.reverse(degreeSequenceList);
 		return degreeSequenceList;
 	}
 	
@@ -238,7 +237,7 @@ public abstract class Graph {
 	/** Main method provided with some basic tests.  */
 	public static void main (String[] args) {
 		GraphLoader.createIntersectionsFile("data/maps/ucsd.map", "data/intersections/ucsd.intersections");
-		
+		GraphLoader.createIntersectionsFile("data/testdata/myTestdata.map", "data/intersections/myTestdata.map");
 
 		// For testing of Part 1 functionality
 		// Add your tests here to make sure your degreeSequence method is returning
@@ -249,7 +248,8 @@ public abstract class Graph {
 		System.out.println("****");
 		System.out.println("Roads / intersections:");
 		GraphAdjList graphFromFile = new GraphAdjList();
-		GraphLoader.loadRoadMap("data/testdata/simpletest.map", graphFromFile);
+		GraphLoader.loadRoadMap("data/maps/ucsd.map", graphFromFile);
+
 		System.out.println(graphFromFile);
 		
 		System.out.println("Observe all degrees are <= 12.");
@@ -270,7 +270,14 @@ public abstract class Graph {
 		// Test your distance2 code here.
 		System.out.println("Testing distance-two methods on sample graphs...");
 		System.out.println("Goal: implement method using two approaches.");
-
+		
+		GraphAdjList myGraph = new GraphAdjList();
+		
+		//GraphLoader.loadRoutes("data/testdata/myTestdata.map", myGraph);
+		//System.out.println(myGraph.getDistance2(1));
+		
+		System.out.println(graphFromFile.degreeSequence());
+		
 
 		
 	}
