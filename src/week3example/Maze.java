@@ -137,7 +137,7 @@ public class Maze {
 	}
 
 	/**
-	 * Clear (reset) the maze so that it will not disply a path
+	 * Clear (reset) the maze so that it will not display a path
 	 * from start to goal.
 	 */
 	public void clearPath() {

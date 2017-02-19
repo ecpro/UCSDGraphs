@@ -99,12 +99,11 @@ public class GraphAdjList extends Graph {
 	 */		
 	 public List<Integer> getDistance2(int v) {
 		 List<Integer> twoHopNeighbours = new ArrayList<Integer>();
-		 List<Integer> neighbours = getNeighbors(v);
-		 for(Integer vertex : neighbours) {
-			 for(Integer i : getNeighbors(vertex)) {
-				 if(i != v) {
-					 twoHopNeighbours.add(i);
-				 }
+		 List<Integer> oneHopNeighbours = getNeighbors(v);
+		 for(Integer oneHopNeighbour : oneHopNeighbours) {
+			 List<Integer> potentialTwoHopNbs = getNeighbors(oneHopNeighbour);
+			 for(Integer twoHopNb : potentialTwoHopNbs) {
+					 twoHopNeighbours.add(twoHopNb);
 			 }
 		 }
 		 return twoHopNeighbours;

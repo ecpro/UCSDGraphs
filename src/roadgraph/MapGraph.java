@@ -8,7 +8,9 @@
 package roadgraph;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -16,32 +18,34 @@ import geography.GeographicPoint;
 import util.GraphLoader;
 
 /**
- * @author UCSD MOOC development team and YOU
+ * @author UCSD MOOC development team and Piyush Ravi
  * 
  * A class which represents a graph of geographic locations
  * Nodes in the graph are intersections between 
  *
  */
 public class MapGraph {
-	//TODO: Add your member variables here in WEEK 3
 	
+	private Map<GeographicPoint,GeoLocation> vertices;
+	private int numVertices;
+	private int numEdges;
 	
 	/** 
 	 * Create a new empty MapGraph 
 	 */
 	public MapGraph()
 	{
-		// TODO: Implement in this constructor in WEEK 3
+		vertices = new HashMap<GeographicPoint, GeoLocation>();
+		numVertices = 0;
+		numEdges = 0;
 	}
 	
 	/**
 	 * Get the number of vertices (road intersections) in the graph
 	 * @return The number of vertices in the graph.
 	 */
-	public int getNumVertices()
-	{
-		//TODO: Implement this method in WEEK 3
-		return 0;
+	public int getNumVertices() {
+		return numVertices;
 	}
 	
 	/**
@@ -50,8 +54,7 @@ public class MapGraph {
 	 */
 	public Set<GeographicPoint> getVertices()
 	{
-		//TODO: Implement this method in WEEK 3
-		return null;
+		return vertices.keySet();
 	}
 	
 	/**
@@ -60,8 +63,7 @@ public class MapGraph {
 	 */
 	public int getNumEdges()
 	{
-		//TODO: Implement this method in WEEK 3
-		return 0;
+		return numEdges;
 	}
 
 	
@@ -75,7 +77,13 @@ public class MapGraph {
 	 */
 	public boolean addVertex(GeographicPoint location)
 	{
-		// TODO: Implement this method in WEEK 3
+		GeoLocation gLoc = new GeoLocation(location);
+		Set<GeographicPoint> geoPointSet = vertices.keySet();
+		if(geoPointSet.isEmpty() || !geoPointSet.contains(location)){
+			vertices.put(location, gLoc);
+			numVertices++;
+			return true;
+		}
 		return false;
 	}
 	
@@ -93,8 +101,14 @@ public class MapGraph {
 	 */
 	public void addEdge(GeographicPoint from, GeographicPoint to, String roadName,
 			String roadType, double length) throws IllegalArgumentException {
-
-		//TODO: Implement this method in WEEK 3
+		
+		if(from == null || to == null || roadName == null || roadType == null || length <= 0) {
+			throw new IllegalArgumentException("invalid argument values");
+		}
+		
+		List<Road> roadList = vertices.get(from).getRoads();
+		roadList.add(new Road(from, to, roadName, roadType, length));
+		numEdges++;
 		
 	}
 	

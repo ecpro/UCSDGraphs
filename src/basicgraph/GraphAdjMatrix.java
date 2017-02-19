@@ -109,9 +109,7 @@ public class GraphAdjMatrix extends Graph {
 		for(Integer oneHopNB : oneHopNBs) {
 			List<Integer> twoHops = getNeighbors(oneHopNB);
 			for(Integer twoHopNeighbour : twoHops) {
-				if(twoHopNeighbour != v) {
 					twoHopNBs.add(twoHopNeighbour);
-				}
 			}
 		}
 		return twoHopNBs;
