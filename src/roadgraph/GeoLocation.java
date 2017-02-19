@@ -81,5 +81,13 @@ public class GeoLocation {
 	public void setRoads(List<Road> roads) {
 		this.roads = roads;
 	}
+	
+	public List<GeographicPoint> getNeighbours() {
+		List<GeographicPoint> neighbours = new ArrayList<GeographicPoint>();
+		for(Road r : roads) {
+			neighbours.add(r.getTo());
+		}
+		return neighbours;
+	}
 
 }
