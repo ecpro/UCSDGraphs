@@ -45,5 +45,6 @@ public class GeographicPoint extends Double {
     	return "Lat: " + getX() + ", Lon: " + getY();
     }
 	
+    
 	
 }

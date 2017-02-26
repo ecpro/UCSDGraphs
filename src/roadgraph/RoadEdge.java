@@ -2,12 +2,7 @@ package roadgraph;
 
 import geography.GeographicPoint;
 
-public class Road {
-
-	// Default road types
-	public static final String EXPRESSWAY = "EXPRESSWAY";
-	public static final String MAIN = "MAIN";
-	public static final String STREET = "STREET";
+public class RoadEdge {
 
 	private String roadName;
 	private String roadType;
@@ -15,6 +10,14 @@ public class Road {
 
 	private GeographicPoint from;
 	private GeographicPoint to;
+
+	public RoadEdge(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length) {
+		this.from = from;
+		this.to = to;
+		this.roadName = roadName;
+		this.roadType = roadType;
+		this.length = length;
+	}
 
 	public String getRoadName() {
 		return roadName;
@@ -56,18 +59,10 @@ public class Road {
 		this.to = to;
 	}
 
-	public Road(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length) {
-		this.from = from;
-		this.to = to;
-		this.roadName = roadName;
-		this.roadType = roadType;
-		this.length = length;
-	}
-	
 	@Override
 	public String toString() {
-		return "Road [ roadName=" + roadName + ", roadType=" + roadType + ", length=" + length
-				+ ", from=" + from + ", to=" + to + "]";
+		return "Road [ roadName=" + roadName + ", roadType=" + roadType + ", length=" + length + ", from=" + from
+				+ ", to=" + to + "]";
 	}
 
 	@Override
@@ -92,7 +87,7 @@ public class Road {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Road other = (Road) obj;
+		RoadEdge other = (RoadEdge) obj;
 		if (from == null) {
 			if (other.from != null)
 				return false;
@@ -117,7 +112,6 @@ public class Road {
 			return false;
 		return true;
 	}
-	
 	
 	
 

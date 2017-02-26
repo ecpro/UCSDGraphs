@@ -8,6 +8,8 @@
 package roadgraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,7 +31,12 @@ import util.GraphLoader;
  */
 public class MapGraph {
 
-	private Map<GeographicPoint, GeoLocation> vertices;
+	// Intersection of a Set of Roads
+	private Map<RoadVertex, Set<RoadEdge>> graphAdjList;
+	
+	// for fast RoadVertex Retrieval
+	private Map<GeographicPoint, RoadVertex> roadVertexLookup;
+	
 	private int numVertices;
 	private int numEdges;
 
@@ -37,9 +44,10 @@ public class MapGraph {
 	 * Create a new empty MapGraph
 	 */
 	public MapGraph() {
-		vertices = new HashMap<GeographicPoint, GeoLocation>();
-		numVertices = 0;
+		graphAdjList = new HashMap<>();
+		roadVertexLookup = new HashMap<>();
 		numEdges = 0;
+		numVertices = 0;
 	}
 
 	/**
@@ -57,7 +65,7 @@ public class MapGraph {
 	 * @return The vertices in this graph as GeographicPoints
 	 */
 	public Set<GeographicPoint> getVertices() {
-		return vertices.keySet();
+		return roadVertexLookup.keySet();
 	}
 
 	/**
@@ -80,14 +88,30 @@ public class MapGraph {
 	 *         already in the graph, or the parameter is null).
 	 */
 	public boolean addVertex(GeographicPoint location) {
-		GeoLocation gLoc = new GeoLocation(location);
-		Set<GeographicPoint> geoPointSet = vertices.keySet();
-		if (geoPointSet.isEmpty() || !geoPointSet.contains(location)) {
-			vertices.put(location, gLoc);
+		
+		if(location != null && !hasLocation(location)) {
+			RoadVertex v = new RoadVertex(location);
+			graphAdjList.put(v, new HashSet<RoadEdge>());
+			roadVertexLookup.put(location, v);
 			numVertices++;
+			//System.out.println("one vertex added " + v + " numVertices " + numVertices);
 			return true;
 		}
+		
+		System.out.println("cannot add vertex" + location.toString());
 		return false;
+		
+	}
+	
+	
+	/**
+	 * check if a location is present as a road vertex
+	 * @param point
+	 * @return boolean
+	 */
+	public boolean hasLocation(GeographicPoint point) {
+	
+		return roadVertexLookup.containsKey(point);
 	}
 
 	/**
@@ -111,15 +135,37 @@ public class MapGraph {
 	 */
 	public void addEdge(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length)
 			throws IllegalArgumentException {
-
-		if (from == null || to == null || roadName == null || roadType == null || length <= 0) {
+		//check for IllegalArgumentException
+		if(from != null && to != null && roadName != null && roadType != null && length >= 0) {
+			RoadEdge edge = new RoadEdge(from, to, roadName, roadType, length);
+			//find road vertex at "from" location
+			RoadVertex rv = roadVertexLookup.get(from);
+			// check if road vertex present at the given location and if present then check if edge is also present or not
+			if(rv != null && !graphAdjList.get(rv).contains(edge)) {
+				graphAdjList.get(rv).add(edge);
+				// also add it road vertex neighbor
+				rv.addNeighbor(to);
+				numEdges++;
+				//System.out.println("edge added to between location " + rv.getLocation() + " and " + rv.getLocation());
+			}
+			else {
+				//System.out.println("road vertex not present or edge already added to vertex");
+			}
+		}
+		else {
 			throw new IllegalArgumentException("invalid argument values");
 		}
+		
 
-		List<Road> roadList = vertices.get(from).getRoads();
-		roadList.add(new Road(from, to, roadName, roadType, length));
-		numEdges++;
-
+	}
+	
+	public void printAllRoadEdges() {
+		
+		for(Map.Entry<RoadVertex, Set<RoadEdge>> entrySet : graphAdjList.entrySet()) {
+			for(RoadEdge edge : entrySet.getValue()) {
+				System.out.println(edge.getFrom() + " is connected to "  + edge.getTo());
+			}
+		}
 	}
 
 	/**
@@ -152,8 +198,7 @@ public class MapGraph {
 	 * @return The list of intersections that form the shortest (unweighted)
 	 *         path from start to goal (including both start and goal).
 	 */
-	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal,
-			Consumer<GeographicPoint> nodeSearched) {
+	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
 
 		Map<GeographicPoint, GeographicPoint> traceRouteMap = new HashMap<>();
 
@@ -166,12 +211,14 @@ public class MapGraph {
 
 		List<GeographicPoint> path = constructPath(traceRouteMap, start, goal);
 
+		Collections.reverse(path);
+		
 		return path;
 
 	}
 
-	private List<GeographicPoint> constructPath(Map<GeographicPoint, GeographicPoint> traceRouteMap,
-			GeographicPoint start, GeographicPoint goal) {
+	private List<GeographicPoint> constructPath(Map<GeographicPoint, GeographicPoint> traceRouteMap, GeographicPoint start, GeographicPoint goal) {
+		
 		List<GeographicPoint> path = new ArrayList<>();
 
 		if (start == goal) {
@@ -191,33 +238,39 @@ public class MapGraph {
 
 	}
 
-	private boolean bfsSearch(GeographicPoint start, GeographicPoint goal,
-			Map<GeographicPoint, GeographicPoint> traceRouteMap, Consumer<GeographicPoint> nodeSearched) {
+	private boolean bfsSearch(GeographicPoint start, GeographicPoint goal, Map<GeographicPoint, GeographicPoint> traceRouteMap, Consumer<GeographicPoint> nodeSearched) {
 
 		Queue<GeographicPoint> toExplore = new LinkedList<GeographicPoint>();
 		Set<GeographicPoint> visited = new HashSet<>();
 		boolean found = false;
 
 		// perform BFS search
+		System.out.println("bfs search start " );
 		toExplore.add(start);
+		//System.out.println(start + " added to the queue");
+		visited.add(start);
 		while (!toExplore.isEmpty()) {
 			GeographicPoint current = toExplore.remove();
-			if (current == goal) {
+			//System.out.println(current + "removed from the queue");
+			if (current.distance(goal) == 0) {
+				//System.out.println("goal location found" + current + " = " + goal);
 				found = true;
 				break;
 			}
 
 			// Hook for visualization.
 			nodeSearched.accept(current);
-			List<GeographicPoint> neighbours = vertices.get(start).getNeighbours();
-
+			List<GeographicPoint> neighbours = roadVertexLookup.get(current).getNeighbor();
+			//System.out.println("list of neighbors of " + current + "  " + neighbours);
 			for (GeographicPoint currGeoPoint : neighbours) {
 				if (!visited.contains(currGeoPoint)) {
 					toExplore.add(currGeoPoint);
+					//System.out.println(currGeoPoint + "added to visitedSet and toExploreSet");
 					visited.add(currGeoPoint);
-					traceRouteMap.put(currGeoPoint, current);
+					traceRouteMap.put(currGeoPoint, current);		
 				}
 			}
+			//System.out.println("traceRouteMap" + traceRouteMap);
 		}
 		return found;
 	}
@@ -307,16 +360,17 @@ public class MapGraph {
 		System.out.print("Making a new map...");
 		MapGraph firstMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
-		GraphLoader.loadRoadMap("data/testdata/myTestData.map", firstMap);
+		GraphLoader.loadRoadMap("data/maps/utc.map", firstMap);
 		System.out.println("DONE.");
-
+		System.out.println(firstMap.getVertices());
 		// You can use this method for testing.
 		
-		GeographicPoint testStart = new GeographicPoint(1.0, 1.0);
-		GeographicPoint testEnd = new GeographicPoint(8.0, -1.0);
+		GeographicPoint testStart = new GeographicPoint(32.869423, -117.220917);
+		GeographicPoint testEnd = new GeographicPoint(32.869255, -117.216927);
 		
-		System.out.println("Number of vertices " + firstMap.getNumEdges() + "\nNumber of Edges " + firstMap.getNumVertices());
 		
+		System.out.println("Number of vertices " + firstMap.getNumVertices() + "\nNumber of Edges " + firstMap.getNumEdges());
+		//firstMap.printAllRoadEdges();
 		
 		
 		List<GeographicPoint> path = firstMap.bfs(testStart, testEnd);
