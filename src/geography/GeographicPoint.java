@@ -1,6 +1,8 @@
 package geography;
 
 import java.awt.geom.Point2D.Double;
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 public class GeographicPoint extends Double {
@@ -45,6 +47,19 @@ public class GeographicPoint extends Double {
     	return "Lat: " + getX() + ", Lon: " + getY();
     }
 	
-    
+    public static void main(String[] args) {
+		
+    	GeographicPoint p1 = new GeographicPoint(2, 1);
+		GeographicPoint p2 = new GeographicPoint(2, 1);
+		GeographicPoint p3 = new GeographicPoint(3, 2);
+		
+		System.out.println(p1.equals(p3));
+		
+		Set<GeographicPoint> set = new HashSet<>();
+		set.add(p1);
+		set.add(p3);
+		
+		System.out.println(set);
+	}
 	
 }
