@@ -229,7 +229,7 @@ public class MapGraph {
 
 		List<GeographicPoint> path = new ArrayList<>();
 
-		if (start.distance(goal) == 0) {
+		if (start.distance(goal) <= 0) {
 			path.add(start);
 			return path;
 		}
